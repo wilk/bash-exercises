@@ -185,3 +185,50 @@ else
     fi
 fi
 #######################################################
+
+#######################################################
+while [ ! $# -eq 0 ]
+do
+        if [ $# -eq 1 ]
+        then
+                FILE=$1
+                echo $FILE
+                break
+        fi
+        case "$1" in
+                --compress | -c)
+                shift
+                COMPRESS=$1
+                if [ "$COMPRESS" != "gzip" ] && [ "$COMPRESS" != "bzip2" ]
+                then
+                        echo "Compressor algorithm not supported"
+                        exit
+                fi
+                shift
+                ;;
+                *)
+                echo "$1 Option not supported"
+                echo "Usage exercise4.sh [OPTIONS] [FILENAME]"
+                exit
+                ;;
+        esac
+done
+
+
+if [ -z ${FILE+x} ]
+then
+        echo "A file is expected"
+        exit
+fi
+
+NEWNAME="$FILE-`date +%Y%m%d`"
+if ! [ -z ${COMPRESS+x} ]
+then
+        mv $FILE $NEWNAME
+        $COMPRESS $NEWNAME
+        touch $FILE
+else
+        mv $FILE $NEWNAME
+        touch $FILE
+fi
+#######################################################
