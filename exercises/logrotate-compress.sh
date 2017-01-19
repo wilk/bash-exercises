@@ -95,7 +95,7 @@ case $compression in
         bzip2 -c $1 > $backup.bz2
     ;;
     "gzip")
-        # user gave "-c gzip" 
+        # user gave "-c gzip"
         echo "Using gzip compression"
         gzip -c $1 > $backup.gz
     ;;
@@ -108,4 +108,80 @@ esac
 
 # create new empty file
 echo '' > $1
+#######################################################
+
+#######################################################
+USAGE="es4.sh <filename> -c(optional) bzip2|gzip\n
+es4.sh <filename> --compress(optional) bzip2|gzip\n"
+
+echo -e $USAGE
+
+MAX_SIZE=20
+
+if [ "$#" -gt 3 ]
+then
+    echo "wrong number of argument. Expected filename and compression type (-c type, optional)"
+    exit 1
+fi
+
+
+if [ "$#" -eq 1 ]
+then
+    echo "simple case with only file name"
+    #get size of the input file
+    file_size=`wc -c < $1`
+    echo $file_size
+
+
+
+    if [ "$file_size" -gt $MAX_SIZE ]
+    then
+        date="$(date +"%Y%m%d")"
+        newFileName="$1-$date"
+        echo "newFileName is $newFileName"
+        mv $1 $newFileName
+        touch $1
+        echo "created new file with $1 name"
+    else
+        echo "file is not big enough, simple case"
+    fi
+else
+    if [[ ( "$#" -eq 3 ) && ( "$2" == "-c" || "$2" == "--compress") ]]
+    then
+    echo "case with compression type"
+    file_size=`wc -c < $1`
+    echo $file_size
+
+    if [ "$file_size" -gt $MAX_SIZE ]
+    then
+        date="$(date +"%Y%m%d")"
+        newFileName="$1-$date"
+        echo "newFileName is $newFileName"
+        mv $1 $newFileName
+        touch $1
+        echo "created new file with $1 name"
+
+        #compress
+        case $3 in
+            bzip2)
+            echo "bzip2 compression"
+            bzip2 $newFileName
+            ;;
+            gzip)
+            echo "gzip compression"
+            gzip $newFileName
+            ;;
+            *)
+            echo "invalid compression type"
+            ;;
+        esac
+
+    else
+        echo "file is not big enough, compression case"
+    fi
+    else
+        echo "wrong number of argument or invalid argument. Expected filename and compression type (-c or --compress, optional)"
+        exit 1
+    fi
+fi
 #######################################################
